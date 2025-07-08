@@ -1,0 +1,36 @@
+services:
+  nlw-agents-pg:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_USER: docker
+      POSTGRES_PASSWORD: docker
+      POSTGRES_DB: agents
+    ports:
+      - '5532:5432'
+    volumes:
+      - ./docker/setup.sql:/docker-entrypoint-initdb.d/setup.sql
+      - pgdata:/var/lib/postgresql/data
+
+  pgadmin:
+    container_name: pgadmin_nlw_agents
+    image: dpage/pgadmin4
+    ports:
+      - '5533:80'
+    environment:
+      PGADMIN_DEFAULT_EMAIL: adriano12144@hotmail.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      # Controle de ambiente (usando arquivo .env)
+      ENVIRONMENT: ${ENVIRONMENT}
+      # Desabilitar CSRF apenas se ambiente for development
+      PGADMIN_CONFIG_WTF_CSRF_CHECK_DEFAULT: ${PGADMIN_CONFIG_WTF_CSRF_CHECK_DEFAULT}
+      PGADMIN_CONFIG_WTF_CSRF_ENABLED: ${PGADMIN_CONFIG_WTF_CSRF_ENABLED}
+    depends_on:
+      - nlw-agents-pg
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+volumes:
+  pgadmin_data:
+    driver: local
+  pgdata:
+    driver: local
